@@ -50,9 +50,13 @@ class Photo:
         self.title = photo_dict['title']
         self.id = photo_dict['id']
         self.owner = photo_dict['owner']
+        try:
+            self.owner_username = photo_dict['owner']['username']
+        except:
+            self.owner_username=""
 
     def __str__(self):
-        return '{0} by {1}'.format(self.title, self.owner)
+        return '{0} by {1}'.format(self.title, self.owner_username)
 
 
 CACHE_DICTION = load_cache_json()
@@ -60,18 +64,22 @@ if DEBUG:
     print(CACHE_DICTION)
 
 pdict = {
-        "method": "flickr.photos.search",
+        "method": "flickr.photos.getInfo",
         "format": "json",
         "api_key": FLICKR_API_KEY,
-        "tags": 'sunset summer',
+        "photo_id": 35187269543,
         "per_page": 10,
         "nojsoncallback": 1
     }
 results = search_flickr(pdict)
 
 photos_list = []
-for r in results['photos']['photo']:
-    photos_list.append(Photo(r))
+if 'photos' in results:
+    for r in results['photos']['photo']:
+        photos_list.append(Photo(r))
+else:
+    for r in results['photo']:
+        photos_list.append(Photo(r))
 
 print()
 print("= compare these outputs = >> ")
